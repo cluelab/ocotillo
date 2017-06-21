@@ -1,0 +1,356 @@
+\section{Graph and Elements}
+We first review the basic graph operations involving nodes and edges.
+
+
+\subsection{Graph and Element Creation}
+It is possible to create a new \defin{Graph} using the following command:
+\begin{java}
+Graph graph = new Graph();
+\end{java}
+
+\defin{Nodes} and \defin{Edges}, which are also called the graph \defin{Elements}, are instead created with the commands:
+\begin{java}
+Node a = new Node("a");
+Node b = new Node("b");
+Edge ab = new Edge("ab", a, b);
+\end{java}
+Here, the first parameter in the constructors is a String ID, which must be unique for all nodes and for all edges in a graph (two nodes or two edges in the same graph cannot have the same ID).
+
+A graph provides methods to create and contextually insert elements without specifying an ID:
+\begin{java}
+Graph graph = new Graph();
+Node a = graph.newNode();
+Node b = graph.newNode("b");
+Edge ab1 = graph.newEdge(a, b);
+Edge ab2 = graph.newEdge("ab", a, b);
+\end{java}
+When the ID is not provided, it is created as an auto-increment integer followed by \emph{n} for nodes, and \emph{e} for edges (examples of generated IDs are ``3n'' and ``10e'').
+
+
+\subsection{Adding and Removing the Elements}
+Already existing nodes and edges can be inserted using the following commands:
+\begin{java}
+graph.add(a);
+graph.add(b);
+graph.add(ab);
+\end{java}
+However, adding elements with same IDs of existing ones or adding an edge that does not have both extremities in a graph will fire a runtime exception. The following lines can be used to prevent both exceptions to the thrown:
+\begin{java}
+graph.forcedAdd(a);
+graph.forcedAdd(ab);
+\end{java}
+In this case, missing edge extremities are inserted along with the edge and the methods do nothing when adding elements that already exist.
+
+Nodes and edges can be removed using the following commands:
+\begin{java}
+graph.remove(a);
+graph.remove(b);
+graph.remove(ab);
+\end{java}
+However, removing elements that are not in the graph or removing a node that still has incident edges will fire a runtime exception. The following lines can be used to prevent both exceptions to the thrown:
+\begin{java}
+graph.forcedRemove(a);
+graph.forcedRemove(ab);
+\end{java}
+In this case, eventual incident edges to a node are also removed and the methods do nothing when removing elements that do not exist.
+
+
+\subsection{Accessing the Elements}
+To retrieve all graph nodes and edges:
+\begin{java}
+graph.nodes();
+graph.edges();
+\end{java}
+To verify if a node has an element either by passing a reference of by querying for IDs:
+\begin{java}
+graph.has(a);
+graph.has(ab);
+graph.hasNode("3n");
+graph.hasEdge("10e");
+\end{java}
+To retrieve a node or edge reference given its IDs:
+\begin{java}
+Node a = graph.getNode("3n");
+Edge b = graph.getEdge("10e");
+\end{java}
+To query for the number of nodes or edges:
+\begin{java}
+graph.nodeCount();
+graph.edgeCount();
+\end{java}
+
+
+\subsection{Incidence Relations}
+Nodes that are incident to an edge can be retrieved directly from the edge:
+\begin{java}
+Node a = ab.source();
+Node b = ab.target();
+\end{java}
+Although all edges are always considered as directed, it is always possible to ignore the edge direction. Moreover, the edge class offers another method to retrieve the other extremity give one:
+\begin{java}
+Node b = ab.otherEnd(a);
+\end{java}
+
+
+The number of edges that depart, arrive or are incident to a node can be retrieved with:  
+\begin{java}
+graph.outDegree(a);
+graph.inDegree(a);
+graph.degree(a);
+\end{java}
+Similarly, collections of such edges can be retrieved with:
+\begin{java}
+graph.outEdges(a);
+graph.inEdges(a);
+graph.inOutEdges(a);
+\end{java}
+
+It is also possible to retrieve all edges going from a node to another with:
+\begin{java}
+graph.fromToEdges(a, b);
+\end{java}
+
+
+\section{Attributes}
+A graph support three type of attributes: \defin{graph attributes}, \defin{node attributes} and \defin{edge attributes}. The last two are also referred as \defin{element attributes}. Graph attributes store a single value for each attribute, while element attributes can have a value for each of the graph nodes and edges.
+
+An attribute can be attached to a graph or be used as one would do with a local variable. In the first case, the attribute is inserted and extracted from a graph with a String ID (or with a standard attribute identifier, which is ultimately translated into a string as well). In the second case, the attribute is handled externally and it is not stored as part of the graph.
+
+\subsection{Graph Attributes}
+Attached graph attributes are set, queried, read and removed as follows:
+\begin{java}
+graph.newGraphAttribute("attrId", value);
+graph.hasGraphAttribute("attrId");
+graph.graphAttribute("attrId");
+graph.removeGraphAttribute("attrId");
+\end{java}
+
+Unattached graph attributes are created as follows:
+\begin{java}
+new GraphAttribute<>(value);
+\end{java}
+
+When reading a graph attribute, the type can be automatically deduced by Java. However, when this does not happen, it is possible to specify the type returned:
+\begin{java}
+GraphAttribute<String> attribute = graph.graphAttribute("attrId");
+new StringTokenizer(graph.<String>graphAttribute("attrId").get());
+\end{java}
+
+Once a graph attribute reference is retrieved as
+\begin{java}
+GraphAttribute<String> name = graph.newGraphAttribute("myGraphName", "Mario");
+GraphAttribute<Double> metric = graph.GraphAttribute("myMetric");
+GraphAttribute<Integer> rank = new GraphAttribute<>(1);
+\end{java}
+the following operations as available:
+\begin{java}
+metric.get();
+metric.set("Luigi");
+\end{java}
+
+
+\subsection{Element Attributes}
+Similarly to graph attributes, attached element attributes are created, queried, retrieved and removed as follows:
+\begin{java}
+graph.newNodeAttribute("attrId", defaultValue);
+graph.hasEdgeAttribute("attrId");
+graph.nodeAttribute("attrId");
+graph.removeEdgeAttribute("attrId");
+\end{java}
+The default value passed on creation is the value assigned to nodes or edges whenever they do not have an implicitly set value. Also, the type of element attribute returned has the same rules seen for graph attributes.
+
+Unattached element attributes are created as follows:
+\begin{java}
+new NodeAttribute<>(defaultValue);
+\end{java}
+
+Once a reference to a node or edge attribute is retrieved as follows:
+\begin{java}
+NodeAttribute<String> labels = graph.newNodeAttribute("myLabels", "");
+EdgeAttribute<Double> metric = graph.edgeAttribute("myMetric");
+EdgeAttribute<Integer> rank = new EdgeAttribute<>(1);
+\end{java}
+the following operations as available:
+\begin{java}
+metric.getDefault();
+metric.setDefault(2.0);
+metric.get(ab);
+metric.set(ab, 3.0);
+metric.clear(ab);
+metric.reset();
+metric.reset(3.0);
+metric.isDefault(ab);
+\end{java}
+The third method returns the value of a node, which is the default value if it has never been directly set. The fifth method removed the values directly assigned to the element. The sixth clears all directly assigned values and the seventh also assigns a new default. The eight method checks if an element has an assigned value or not. Note that this is different from verifying if the value returned equal the default one:
+\begin{java}
+metric.setDefault(0.0);
+metric.clear(ab);
+assertThat(metric.isDefault(ab), is(true));
+assertThat(metric.get(ab) == metric.getDefault(), is(true));
+
+metric.set(ab, 0.0);
+assertThat(metric.isDefault(ab), is(false));
+assertThat(metric.get(ab) == metric.getDefault(), is(true));
+
+metric.setDefault(ab, 1.0);
+assertThat(metric.isDefault(ab), is(false));
+assertThat(metric.get(ab) == metric.getDefault(), is(false));
+\end{java}
+
+
+\subsection{Standard Attributes}
+Certain attributes have reserved roles in a graph, mostly because they encode the information required to draw the graph. Such attributes include the node position or size, labels and colors. The class StdAttribute contain the list of reserved attribute IDs along with the type of data that they are allowed to contain: creating or assigning reserved attribute IDs with value of the wrong type results in a runtime exception.
+
+When accessing a standard attribute that has not been initialized before, the attribute is automatically generated with a default value. This allows to draw graphs even when the user did not provide attributes such as the node color or size. Therefore, the following code, which would generate a runtime exception for non standard attributes, works fine:
+\begin{java}
+Graph graph = new Graph();
+NodeAttribute<String> labels = graph.nodeAttribute(StdAttribute.label);
+\end{java}
+
+Standard attributes that have been automatically generated and never modified by the user are considered ``sleeping attributes''. Among other things, sleeping attributes are not stored when saving the graph.
+
+
+\subsection{Attribute Descriptions}
+Attributes can save a general description, as well as a description of the current states, using the related get/set methods provided.
+
+
+\subsection{Generic Attribute Methods}
+For some of the methods mentioned above, there exist a version where the type of attribute desired is passed as a parameter. For example:
+\begin{java}
+graph.attributes(type);
+graph.localAttributes(type);
+graph.hasAttribute(type, "attrID");
+\end{java}
+These methods can help reducing code repetitions in certain applications, such as when serializing a graph.
+
+
+
+
+\section{Graph Hierarchy}
+Every graph supports a hierarchy of sub-graphs. A sub-graph can be created with:
+\begin{java}
+Graph subgraphA = graph.newSubgraph(); 
+Graph subgraphB = graph.newSubgraph(nodes, edges); 
+Graph subgraphC = graph.newInducedSubgraph(nodes); 
+\end{java}
+In the first case, the sub-graph will not have any node or edge. In the second case, it will have the nodes and edges specified. In the third case, it will contain the nodes specified and all edges between them.
+
+Note that the sub-graph relationship will always be enforced, therefore:
+\begin{itemize}
+ \item whenever a new element is inserted in a sub-graph, it is also added to all its parents;
+ \item whenever an element is removed from a graph, it is also removed from all its sub-graphs.
+\end{itemize}
+
+The parent of a given graph in the hierarchy can be retrieved with:
+\begin{java}
+Graph parent = graph.parentGraph();
+\end{java}
+which will return null if the graph is the root of the hierarchy. The root graph can be retrieved with:
+\begin{java}
+Graph root = graph.rootGraph();
+\end{java}
+which will be the graph itself if the graph is root. The collection of all sub-graphs can instead be retrieved with:
+\begin{java}
+graph.subGraphs();
+\end{java}
+
+
+\subsection{Attributes and Graph Hierarchy}
+Sub-graphs automatically inherit the attributes of their parent. When an attribute is read or retrieved with:
+\begin{java}
+graph.graphAttribute("attrId");
+graph.nodeAttribute("attrId");
+graph.edgeAttribute("attrId"); 
+\end{java}
+the attribute is searched in every graph on the path from the current to the root, and returned as soon as it matches the desired attribute ID and type. We call this the \defin{first matching attribute} (FMA). For instance, in a hierarchy where the attribute \emph{metric} is defined in the root and in its grandchild, fetching \emph{metric} will return the grandchild attribute when called from the grandchild, and the root one when called from root or from its child.
+
+Whenever an attribute is created in a sub-graph with the following methods:
+\begin{java}
+graph.setGraphAttribute("attrId", value);
+graph.newNodeAttribute("attrId", defaultValue);
+graph.newEdgeAttribute("attrId", defaultValue);
+\end{java}
+it is actually created on the root graph. The behavior of these methods is different when an identical attribute with that name already exists in the hierarchy. In the first case, the attribute set is the FMA. In the other cases, it throws an exception. 
+
+It is possible to create an attribute at a specific level of a hierarchy using the commands:
+\begin{java}
+graph.setLocalGraphAttribute("attrId", value);
+graph.newLocalNodeAttribute("attrId", defaultValue);
+graph.newLocalEdgeAttribute("attrId", defaultValue);
+\end{java}
+Attributes created at a certain level are still available for the child graphs following the FMA rules, but cannot be accessed by the parent graphs. Also, local attributes practically override attributes with the same name at higher levels of the hierarchy, since they would be the one returned according to the FMA rules.
+
+The methods for verifying whether an attribute exists, or to remove an attribute, also follow the FMA rules. In addition, the methods:
+\begin{java}
+graph.hasLocalGraphAttribute("attrId");
+graph.hasLocalNodeAttribute("attrId");
+graph.hasLocalEdgeAttribute("attrId");
+\end{java}
+check if a matching attribute exists only at the current level of the hierarchy.
+
+Finally, it is possible to retrieve all the local or global attributes of a given type using the following commands:
+\begin{java}
+graph.graphAttributes();
+graph.localGraphAttributes();
+
+graph.nodeAttributes();
+graph.localNodeAttributes();
+
+graph.edgeAttributes();
+graph.localEdgeAttributes();
+\end{java}
+
+
+\section{Observe Changes}
+By using the Observer pattern, it is possible to be notified for changes in the graph.
+
+\subsection{Changes in the Graph Structure}
+It is possible to register and remove a graph observer with the commands:
+\begin{java}
+graph.registerObserver(observer);
+graph.removeObserver(observer);
+\end{java}
+
+A graph observer must implement the methods:
+\begin{java}
+observer.updateElements(elements);
+observer.updateSubGraphs(subGraphs);
+observer.updateAttributes(attributes);
+\end{java}
+which should contain the code to update the elements, sub-graphs and the attributes which have been recently added or removed from the graph. Note that the graph will notify the observers only for \emph{local} attributes that are added or removed. Inherited attributes (which include non-local attributes that are created or removed at a different point in the hierarchy) will trigger the notification in their local graph but not in this. 
+
+Finally, it is possible to perform bulk notifications using the following commands:
+\begin{java}
+graph.startBulkNotification();
+graph.stopBulkNotification();
+\end{java}
+When this is done, the notifications are not sent in correspondence to every single change, but they are saved and sent as a single block as soon as the second method is called.
+
+
+\subsection{Changes in Attributes}
+It is possible to register and remove an element attribute observer with the commands:
+\begin{java}
+attribute.registerObserver(observer);
+attribute.removeObserver(observer);
+\end{java}
+
+A graph attribute observer must implement the method:
+\begin{java}
+observer.update();
+\end{java}
+which should contain the code to handle a change of attribute value;
+
+An element attribute observer must implement the methods:
+\begin{java}
+observer.update(elements);
+observer.updateAll();
+\end{java}
+which should contain the code to update only the elements that changed, or all the nodes or edges in a graph. The first is called when all nodes or edges that changed are known to the attribute (such as setting the value of single elements), the second is called when the changes involve all elements or elements unknown by the attribute (for example, when the default value is changed).
+
+Again, it is possible to perform bulk notifications using the following commands:
+\begin{java}
+attribute.startBulkNotification();
+attribute.stopBulkNotification();
+\end{java}
+
+
