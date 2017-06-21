@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
-<project name="Ocotillo" basedir="." default="setup">
+<project name="Ocotillo" basedir="." default="jar">
+
+    <property name="ant.build.javac.source" value="1.7"/>
+    <property name="ant.build.javac.target" value="1.7"/>
 
     <property name="sourceDir"       value="source"/>
     <property name="buildDir"        value="build"/>
@@ -68,10 +71,10 @@
     <target name="build" depends="setup" description="Compiles the project.">
         <mkdir dir="${classesDir}"/>
         <mkdir dir="${testClassesDir}"/>
-        <javac srcdir="${sourceDir}" destdir="${classesDir}" classpathref="fullClasspath" encoding="UTF-8" debug="true" includeantruntime="false">
+        <javac srcdir="${sourceDir}" destdir="${classesDir}" classpathref="fullClasspath" encoding="UTF-8" debug="true" includeantruntime="false" compiler="javac1.7">
             <compilerarg value="-Xlint"/>
         </javac>
-        <javac srcdir="${testDir}" destdir="${testClassesDir}" classpathref="fullClasspath" encoding="UTF-8" debug="true" includeantruntime="false">
+        <javac srcdir="${testDir}" destdir="${testClassesDir}" classpathref="fullClasspath" encoding="UTF-8" debug="true" includeantruntime="false" compiler="javac1.7">
             <compilerarg value="-Xlint"/>
         </javac>
     </target>
